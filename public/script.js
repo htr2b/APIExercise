@@ -1,10 +1,14 @@
 const postBtn = document.getElementById('post-btn');
 const getBtn = document.getElementById('get-btn');
 const userList = document.getElementById('user-list');
+const userForm = document.getElementById('user-form');
 
-postBtn.onclick = () => {
+userForm.addEventListener('submit', e => {
+    e.preventDefault();
     const name = document.getElementById('name').value.trim();
     const age = Number(document.getElementById('age').value);
+    if (!name || isNaN(age)) return;
+
     fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -12,12 +16,11 @@ postBtn.onclick = () => {
     })
         .then(res => res.json())
         .then(user => {
-            alert(`Eklendi: ${user.name} (${user.age})`);
-            renderUsers();
+            userForm.reset();
         });
-};
+});
 
-getBtn.onclick = renderUsers;
+getBtn.addEventListener('click', renderUsers);
 
 function renderUsers() {
     fetch('/api/users')
@@ -29,13 +32,12 @@ function renderUsers() {
                 li.textContent = `${user.name} (${user.age})`;
 
                 const delBtn = document.createElement('button');
-                delBtn.textContent = 'del';
+                delBtn.textContent = 'Delete';
                 delBtn.onclick = () => deleteUser(user.id);
-                li.appendChild(delBtn);
 
+                li.appendChild(delBtn);
                 userList.appendChild(li);
             });
-
         });
 }
 
@@ -45,10 +47,7 @@ function deleteUser(id) {
             if (res.status === 204) {
                 renderUsers();
             } else {
-                alert('Silme hatası! Kod: ' + res.status);
             }
         });
 }
 
-
-renderUsers();
